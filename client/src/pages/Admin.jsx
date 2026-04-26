@@ -159,12 +159,12 @@ export default function AdminDashboard() {
                     <div>
                         <label className="block text-sm font-medium mb-1">Variant</label>
                         <select {...register('variant')} className="w-full border p-2 rounded">
-                            <option value="others">Others</option>
                             <option value="tshirt">T-Shirt</option>
-                            <option value="jacket">Jacket</option>
-                            <option value="pants">Pants</option>
+                            <option value="shirt">Shirt</option>
+                            <option value="jeans">Jeans</option>
+                            <option value="top">Top</option>
                             <option value="hoodie">Hoodie</option>
-                            <option value="short">Short</option>
+                            <option value="others">Others</option>
                         </select>
                     </div>
                 </div>

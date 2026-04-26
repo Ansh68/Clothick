@@ -10,21 +10,35 @@ import {
   Share2,
   HelpCircle,
   ArrowLeftRight,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Check,
 } from 'lucide-react';
 import { fetchProductBySlug } from '../api/products';
 import Container from '../components/Container';
 import PriceView from '../components/PriceView';
-import AddToCartButton from '../components/AddToCartButton';
 import Loading from '../components/Loading';
 import useWishlistStore from '../store/wishlistStore';
+import useCartStore from '../store/cartStore';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 export default function Product() {
   const { slug } = useParams();
   const [selectedImage, setSelectedImage] = useState(0);
   const [showCharacteristics, setShowCharacteristics] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const navigate = useNavigate();
 
   const toggleItem = useWishlistStore((s) => s.toggleItem);
+  const { user } = useAuth();
+  const addItem = useCartStore((s) => s.addItem);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const getItemCount = useCartStore((s) => s.getItemCount);
 
   const {
     data: product,
@@ -44,6 +58,7 @@ export default function Product() {
 
   const images = product?.images || [];
   const currentImage = images[selectedImage] || images[0];
+  const cartQty = getItemCount(product?._id);
 
   const handleWishlist = () => {
     toggleItem(product);
@@ -60,6 +75,28 @@ export default function Product() {
       navigator.clipboard.writeText(window.location.href);
       toast.success('Link copied to clipboard');
     }
+  };
+
+  const handleAddToCart = () => {
+    if (!user) {
+      navigate('/signin');
+      toast.error('Please sign in to add to cart');
+      return;
+    }
+    if (!selectedSize) {
+      toast.error('Please select a size');
+      return;
+    }
+    addItem(product);
+    toast.success('Added to cart');
+  };
+
+  const handleIncrement = () => {
+    addItem(product);
+  };
+
+  const handleDecrement = () => {
+    removeItem(product._id);
   };
 
   const discountAmount = product?.discount
@@ -174,15 +211,65 @@ export default function Product() {
               <p className="text-gray-500 text-sm italic">{product.intro}</p>
             )}
 
+            {/* Size Selector */}
+            <div className="mt-1">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-gray-800">Select Size</span>
+                <button className="text-xs text-gray-500 underline underline-offset-2 hover:text-black transition-colors">
+                  Size Guide
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {SIZES.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`min-w-[48px] h-11 px-3 rounded-md border-2 text-sm font-semibold transition-all duration-200 ${selectedSize === size
+                        ? 'border-black bg-black text-white'
+                        : 'border-gray-200 text-gray-700 hover:border-black'
+                      }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Add to Cart + Wishlist */}
             <div className="flex items-center gap-3 mt-2">
-              <AddToCartButton
-                product={product}
-                className="flex-1 bg-darkColor text-white hover:bg-darkColor/90 hoverEffect px-6 py-3 rounded-md text-sm font-semibold text-center"
-              />
+              {cartQty > 0 ? (
+                /* Quantity Controls — shown after item is in cart */
+                <div className="flex-1 flex items-center rounded-md border-2 border-black overflow-hidden h-12">
+                  <button
+                    onClick={handleDecrement}
+                    className="w-12 h-full flex items-center justify-center text-black hover:bg-gray-100 transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <div className="flex-1 flex items-center justify-center gap-2 font-semibold text-sm bg-black text-white h-full">
+                    <Check className="w-4 h-4" />
+                    <span>{cartQty} in Cart</span>
+                  </div>
+                  <button
+                    onClick={handleIncrement}
+                    className="w-12 h-full flex items-center justify-center text-black hover:bg-gray-100 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                /* Add to Cart button — shown when not in cart */
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 flex items-center justify-center gap-2 bg-darkColor text-white hover:bg-darkColor/90 hoverEffect px-6 py-3 rounded-md text-sm font-semibold h-12"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  Add to Cart
+                </button>
+              )}
               <button
                 onClick={handleWishlist}
-                className={`border-2 px-3.5 py-2.5 rounded-md transition-all duration-300 hover:scale-105 ${isInWishlist
+                className={`border-2 px-3.5 py-2.5 rounded-md transition-all duration-300 hover:scale-105 h-12 ${isInWishlist
                   ? 'border-black bg-black text-white'
                   : 'border-gray-300 text-gray-600 hover:border-black hover:text-black'
                   }`}

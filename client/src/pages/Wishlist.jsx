@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Trash2, ShoppingBag } from 'lucide-react';
+import { Heart, Trash2, ShoppingBag, X, AlertTriangle } from 'lucide-react';
 import useWishlistStore from '../store/wishlistStore';
 import useCartStore from '../store/cartStore';
 import { useAuth } from '../context/AuthContext';
@@ -8,11 +9,67 @@ import Container from '../components/Container';
 import PriceView from '../components/PriceView';
 import toast from 'react-hot-toast';
 
+// Clear Wishlist Confirmation Modal
+function ClearModal({ onConfirm, onCancel }) {
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onCancel}
+            />
+
+            {/* Modal */}
+            <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
+                {/* Close Button */}
+                <button
+                    onClick={onCancel}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+
+                {/* Icon */}
+                <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="w-7 h-7 text-red-500" />
+                </div>
+
+                {/* Content */}
+                <div className="text-center">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        Clear Wishlist
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-6">
+                        Are you sure you want to remove all items from your wishlist? This action cannot be undone.
+                    </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors"
+                    >
+                        Yes, Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Wishlist() {
     const { items, removeItem, clearWishlist } = useWishlistStore();
     const addItem = useCartStore((s) => s.addItem);
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [showClearModal, setShowClearModal] = useState(false);
 
     const handleAddToCart = (product) => {
         if (!user) {
@@ -30,10 +87,9 @@ export default function Wishlist() {
     };
 
     const handleClearWishlist = () => {
-        if (window.confirm('Are you sure you want to clear your wishlist?')) {
-            clearWishlist();
-            toast.success('Wishlist cleared');
-        }
+        clearWishlist();
+        setShowClearModal(false);
+        toast.success('Wishlist cleared');
     };
 
     return (
@@ -52,7 +108,7 @@ export default function Wishlist() {
                     </div>
                     {items.length > 0 && (
                         <button
-                            onClick={handleClearWishlist}
+                            onClick={() => setShowClearModal(true)}
                             className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-sm font-medium shrink-0"
                         >
                             <Trash2 className="w-4 h-4" />
@@ -137,6 +193,14 @@ export default function Wishlist() {
                     </div>
                 )}
             </Container>
+
+            {/* Clear Wishlist Modal */}
+            {showClearModal && (
+                <ClearModal
+                    onConfirm={handleClearWishlist}
+                    onCancel={() => setShowClearModal(false)}
+                />
+            )}
         </div>
     );
 }
