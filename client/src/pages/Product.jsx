@@ -250,7 +250,7 @@ export default function Product() {
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-1">
               <button className="flex items-center gap-1.5 hover:text-black transition-colors">
                 <ArrowLeftRight className="w-4 h-4" />
-                Compare color
+                All Sizes Available
               </button>
               <button className="flex items-center gap-1.5 hover:text-black transition-colors">
                 <HelpCircle className="w-4 h-4" />
@@ -276,7 +276,7 @@ export default function Product() {
                   Free Shipping
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Free shipping over order ₹1200
+                  Free shipping over order ₹1000
                 </p>
               </div>
               <div className="border border-gray-200 rounded-lg p-4 text-center">
@@ -284,7 +284,7 @@ export default function Product() {
                   Flexible Payment
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Pay with Multiple Credit Cards
+                  COD or UPI Available
                 </p>
               </div>
             </div>
