@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema(
     status: { type: String, enum: ['new', 'hot', 'sale', ''], default: '' },
     variant: {
       type: String,
-      enum: ['tshirt', 'shirt', 'jeans', 'hoodie', 'shorts', 'others'],
+      enum: ['tshirt', 'shirt', 'jeans', 'top', 'hoodie', 'shorts', 'others'],
       default: 'others',
     },
     gender: {
