@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Container from './Container';
 import CartIcon from './CartIcon';
@@ -6,7 +6,6 @@ import WishlistIcon from './WishlistIcon';
 import ProfileDropdown from './ProfileDropdown';
 import { Search, X } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const { user } = useAuth();
@@ -24,65 +23,83 @@ export default function Header() {
     }
   };
 
-  const navLinks = [
-    { title: 'Home', link: '/' },
-    { title: 'Men', link: '/men' },
+  const leftLinks = [
     { title: 'Women', link: '/women' },
-    { title: 'New', link: '/new-arrivals' },
+    { title: 'Men', link: '/men' },
     { title: 'Shop', link: '/shop' },
   ];
 
   return (
-    <header className="bg-white sticky top-0 z-50 border-b border-b-gray-200 py-4">
-      <Container className="flex items-center justify-between gap-5 text-lightColor relative">
-        <Link to="/" className="text-xl font-bold tracking-tighter text-black uppercase absolute left-1/2 transform -translate-x-1/2">
-          Clothick
-        </Link>
+    <header className="bg-white sticky top-0 z-50 border-b border-gray-100">
+      <Container className="relative flex items-center justify-between h-14">
 
-        <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((item) => (
+        {/* Left — Nav links */}
+        <nav className="hidden md:flex items-center gap-7">
+          {leftLinks.map((item) => (
             <Link
               key={item.title}
               to={item.link}
-              className={`relative group overflow-hidden font-medium text-xs uppercase tracking-wider hover:text-black duration-300 ${location.pathname === item.link ? 'text-black' : 'text-gray-500'}`}
+              className={`text-[13px] font-semibold uppercase tracking-wider transition-colors duration-200 ${location.pathname === item.link
+                  ? 'text-black'
+                  : 'text-gray-500 hover:text-black'
+                }`}
             >
               {item.title}
-              <span className={`w-full h-[1.5px] bg-black absolute bottom-0 left-0 transform -translate-x-[101%] group-hover:translate-x-0 transition-transform duration-300 ${location.pathname === item.link ? 'translate-x-0' : ''}`} />
             </Link>
           ))}
         </nav>
 
-        <div className="flex-1"></div>
+        {/* Center — Logo */}
+        <Link
+          to="/"
+          className="absolute left-1/2 -translate-x-1/2 text-2xl font-extrabold tracking-tight text-black uppercase"
+        >
+          Clothick
+        </Link>
 
-        <div className="flex items-center justify-end gap-5">
+        {/* Right — Icons */}
+        <div className="flex items-center gap-5 ml-auto">
+          {/* Search */}
           {showSearch ? (
-            <form onSubmit={handleSearch} className="absolute top-20 left-0 w-full bg-white p-4 border-b flex items-center justify-center gap-2 z-50 shadow-md md:relative md:top-0 md:bg-transparent md:p-0 md:border-none md:shadow-none md:w-auto">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-3 py-1"
+            >
+              <Search className="w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="border border-gray-300 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-black w-full md:w-48"
+                className="bg-transparent text-sm focus:outline-none w-36"
                 autoFocus
               />
-              <button type="button" onClick={() => setShowSearch(false)} className="md:hidden">
-                <X className="w-5 h-5" />
+              <button
+                type="button"
+                onClick={() => { setShowSearch(false); setSearchQuery(''); }}
+              >
+                <X className="w-3.5 h-3.5 text-gray-400 hover:text-black" />
               </button>
             </form>
           ) : (
-            <button onClick={() => setShowSearch(true)} className="text-gray-500 hover:text-black transition-colors">
-              <Search className="w-5 h-5" />
+            <button
+              onClick={() => setShowSearch(true)}
+              className="text-gray-600 hover:text-black transition-colors"
+            >
+              <Search className="w-[18px] h-[18px]" />
             </button>
           )}
 
           <WishlistIcon />
-
           <CartIcon />
 
           {user ? (
             <ProfileDropdown />
           ) : (
-            <Link to="/signin" className="text-sm font-semibold text-gray-600 hover:text-black transition-colors uppercase">
+            <Link
+              to="/signin"
+              className="text-[13px] font-semibold text-gray-600 hover:text-black transition-colors uppercase tracking-wide"
+            >
               Login
             </Link>
           )}
