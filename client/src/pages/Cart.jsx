@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Heart, Trash2, Minus, Plus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ShoppingBag, Heart, Trash2, Minus, Plus, AlertCircle } from 'lucide-react';
 import useCartStore from '../store/cartStore';
 import useWishlistStore from '../store/wishlistStore';
 import { useAuth } from '../context/AuthContext';
+import { fetchAddresses } from '../api/auth';
 import Container from '../components/Container';
 import EmptyCart from '../components/EmptyCart';
 import Loading from '../components/Loading';
@@ -27,10 +29,19 @@ export default function Cart() {
   } = useCartStore();
   const { toggleItem, isInWishlist } = useWishlistStore();
 
+  const { data: addresses = [] } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: fetchAddresses,
+    enabled: !!user,
+  });
+
   useEffect(() => setMounted(true), []);
   if (!mounted) return <Loading />;
 
   const groupedItems = getGroupedItems();
+  const hasAddress = addresses.length > 0;
+  const hasPhone = !!user?.phone;
+  const canCheckout = hasAddress && hasPhone;
 
   const loadRazorpay = () =>
     new Promise((resolve) => {
@@ -43,6 +54,11 @@ export default function Cart() {
     });
 
   const handleCheckout = async () => {
+    if (!canCheckout) {
+      toast.error('Please add your address and phone number first');
+      return;
+    }
+
     setLoading(true);
     try {
       const ok = await loadRazorpay();
@@ -61,6 +77,7 @@ export default function Cart() {
         prefill: {
           name: user?.name || '',
           email: user?.email || '',
+          contact: user?.phone || '',
         },
         handler: async (response) => {
           try {
@@ -184,8 +201,8 @@ export default function Cart() {
                                 );
                               }}
                               className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${inWishlist
-                                  ? 'text-black'
-                                  : 'text-gray-500 hover:text-black'
+                                ? 'text-black'
+                                : 'text-gray-500 hover:text-black'
                                 }`}
                             >
                               <Heart
@@ -282,15 +299,44 @@ export default function Cart() {
                 </span>
               </div>
 
-              {/* Checkout / Sign In Button */}
+              {/* Checkout / Sign In / Missing Info */}
               {user ? (
-                <button
-                  onClick={handleCheckout}
-                  disabled={loading}
-                  className="w-full mt-5 py-3.5 rounded-lg font-semibold bg-black text-white hover:bg-gray-900 transition-colors disabled:opacity-50 text-sm"
-                >
-                  {loading ? 'Processing...' : 'Proceed to Checkout'}
-                </button>
+                <>
+                  {!canCheckout && (
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                        <div className="text-xs text-amber-800">
+                          {!hasAddress && !hasPhone && (
+                            <p>Please add your <strong>address</strong> and <strong>phone number</strong> before checkout.</p>
+                          )}
+                          {!hasAddress && hasPhone && (
+                            <p>Please add your <strong>delivery address</strong> before checkout.</p>
+                          )}
+                          {hasAddress && !hasPhone && (
+                            <p>Please add your <strong>phone number</strong> before checkout.</p>
+                          )}
+                        </div>
+                      </div>
+                      <Link
+                        to="/account?tab=profile"
+                        className="block mt-2 text-xs font-semibold text-amber-700 underline underline-offset-2 hover:text-amber-900"
+                      >
+                        Go to Account Settings →
+                      </Link>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleCheckout}
+                    disabled={loading || !canCheckout}
+                    className={`w-full mt-4 py-3.5 rounded-lg font-semibold text-sm transition-colors ${canCheckout
+                        ? 'bg-black text-white hover:bg-gray-900'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      } disabled:opacity-50`}
+                  >
+                    {loading ? 'Processing...' : canCheckout ? 'Proceed to Checkout' : 'Complete Profile to Checkout'}
+                  </button>
+                </>
               ) : (
                 <Link
                   to="/signin"
@@ -313,3 +359,4 @@ export default function Cart() {
     </div>
   );
 }
+
