@@ -1,6 +1,5 @@
-# Tulos MERN Stack Clone
+# E-Commerce platform
 
-Exact replica of the Tulos ecommerce app built with **MERN** (MongoDB, Express, React, Node.js) in **JavaScript**. No Messenger/chat feature.
 
 ## Quick start
 
@@ -36,7 +35,7 @@ Runs on `http://localhost:5173`.
   - `RAZORPAY_KEY_SECRET`
   in `server/.env`.
 
-This clone uses **Razorpay Checkout + signature verification** (no webhook required for the basic flow).
+This project uses **Razorpay Checkout + signature verification** (no webhook required for the basic flow).
 
 ### 5. Seed data (optional)
 
