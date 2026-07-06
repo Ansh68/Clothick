@@ -48,7 +48,7 @@ export default function Contact() {
                 <div>
                   <p className="text-xs text-gray-400 font-medium">Chat to us</p>
                   <p className="text-sm font-bold text-gray-900 mt-0.5">
-                    support@clothick.com
+                    ankit.b@clothick.io1.in
                   </p>
                 </div>
               </div>
